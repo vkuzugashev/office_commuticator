@@ -35,11 +35,19 @@ def hangup(uniqueid, end):
     call = json.loads(str_call)
     if call['call_status'] == 'ANSWER':
         call['end'] = end
-    store_to_db(call)
+    store_to_queue(call)
 
-def store_to_db(call):
-    print(f' [x] Store call to db: {call}')
+def store_to_queue(call,**kwargs):
+    connection = pika.BlockingConnection(pika.ConnectionParameters('localhost', port=5672))
+    channel = connection.channel()
+    
+    channel.queue_declare(queue='calls')
 
+    channel.basic_publish(exchange='',
+                          routing_key='calls',
+                          body=json.dumps(call))
+    print(f' [x] Store call to queue: {call}')
+    
 def set_call(key):
     r = get_redis_client()
     r.setex(key, flushall, 60)
