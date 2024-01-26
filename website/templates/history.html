@@ -1,0 +1,34 @@
+{% extends 'body.html' %}
+
+{% block title %}История звонков{% endblock %}
+
+{% block content %}
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='table.css') }}">
+
+    <h1 class="mb-5">История звонков</h1>
+    
+    <div class="card-columns">
+        <table>
+            <th><center>id</center></th>
+            <th><center>кто позвонил</center></th>
+            <th><center>кто ответил</center></th>
+            <th><center>время звонка</center></th>
+            <th><center>время конца звонка</center></th>
+            <th><center>статус звонка</center></th>
+
+        {% for row in data %}
+            <tr>        
+                <td><center>{{row.id}}</center></td>
+                <td><center>{{row.id_caller}}</center></td>
+                <td><center>{{row.id_callee}}</center></td>
+                <td><center>{{row.call_start}}</center></td>
+                <td><center>{{row.call_end}}</center></td>
+                <td><center>{{row.call_status}}</center></td>
+            </tr>                
+        {% endfor %}
+
+        </table>
+    </div>
+
+{% endblock %}
