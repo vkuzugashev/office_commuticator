@@ -50,7 +50,7 @@ def store_to_queue(call,**kwargs):
     
 def set_call(key):
     r = get_redis_client()
-    r.setex(key, flushall, 60)
+    r.setex(key, 60)
     
 def event_parse_and_route(body):
     

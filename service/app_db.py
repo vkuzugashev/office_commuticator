@@ -1,7 +1,7 @@
 import pika, sys, os, json
 from datetime import datetime
-from sqlalchemy import create_engine, MetaData, Table, String, Integer, Column, Text, DateTime, Boolean
-
+sys.path.insert(1, '..')
+from models.model import db, table_calls
 
 def callback(ch, method, properties, body):    
     print(f' [x] Received {body}')
@@ -21,24 +21,12 @@ def callback(ch, method, properties, body):
     connection_bd(body)
 
 def connection_bd(body):
-    engine = create_engine("mysql+pymysql://root:1234567@localhost/call_center")
-    conn = engine.connect()
-
-    metadata = MetaData()
-
-    blogs = Table('blog', metadata, 
-        Column('id', Integer(),primary_key=True),
-        Column('id_caller', String(200), nullable=False),
-        Column('id_callee', String(200),  nullable=True),
-        Column('call_start', String(200), nullable=False),
-        Column('call_end', String(200), nullable=False),
-        Column('call_status', String(200), nullable=False)
-    )
-    
+    conn = db.connect()
+   
     call = json.loads(body)
     print(call,'\r\n')
     
-    ins = blogs.insert().values(
+    ins = table_calls.insert().values(
         id_caller = call['caller'],
         id_callee = call['callee'],
         call_start = call['start'],
@@ -48,14 +36,14 @@ def connection_bd(body):
 
     print(ins)
 
-    t = conn.begin()
+    tran = conn.begin()
 
     try:
-        r = conn.execute(ins)
-        t.commit()
+        conn.execute(ins)
+        tran.commit()
         print("Транзакция завершена.")
     except:
-        t.rollback()
+        tran.rollback()
         print("Транзакция не удалась.")
 
 

@@ -7,6 +7,13 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='table.css') }}">
 
     <h1 class="mb-5">История звонков</h1>
+
+    Время звонка:
+    <input type="text" id="name" name="name"
+    required minlength="4" maxlength="8" size="10" />
+    -
+    <input type="text" id="name" name="name"
+    required minlength="4" maxlength="8" size="10" />
     
     <div class="card-columns">
         <table>
@@ -16,7 +23,6 @@
             <th><center>время звонка</center></th>
             <th><center>время конца звонка</center></th>
             <th><center>статус звонка</center></th>
-
         {% for row in data %}
             <tr>        
                 <td><center>{{row.id}}</center></td>
@@ -27,7 +33,6 @@
                 <td><center>{{row.call_status}}</center></td>
             </tr>                
         {% endfor %}
-
         </table>
     </div>
 
