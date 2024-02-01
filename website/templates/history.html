@@ -6,14 +6,36 @@
 
     <link rel="stylesheet" href="{{ url_for('static', filename='table.css') }}">
 
+    <script src="../instance/imask.css"></script>
+    <script src="../instance/imask.js"></script>
+
     <h1 class="mb-5">История звонков</h1>
 
     Время звонка:
-    <input type="text" id="name" name="name"
-    required minlength="4" maxlength="8" size="10" />
-    -
-    <input type="text" id="name" name="name"
-    required minlength="4" maxlength="8" size="10" />
+
+    <div class="row">
+            <table>
+                <tr>
+                    <th>
+                        <div class="col">
+                            <input type="text" id="from" name="fromdt" class="form-control" value="{{fromdt}}"/>
+                        </div>
+                    </th>
+                    <th>
+                        <div class="col">
+                            <input type="text" id="to" name="todt" class="form-control"  value="{{todt}}"/>
+                        </div>
+                    </th>
+                    <th>
+                        <div class="col">
+                            <center>
+                                <button id="btn_find" type="button" class="btn btn-primary">Найти</button>
+                            </center>
+                        </div>
+                    </th>
+                </tr>
+            </table>
+    </div>
     
     <div class="card-columns">
         <table>
@@ -33,7 +55,71 @@
                 <td><center>{{row.call_status}}</center></td>
             </tr>                
         {% endfor %}
-        </table>
+        </table>        
     </div>
+
+    <nav aria-label="Page navigation example">
+        <ul class="pagination">
+          <li class="page-item">
+            <a class="page-link" href="/history/{{fromdt}}/{{todt}}/{{page_index-1}}" aria-label="Previous">
+              <span aria-hidden="true">&laquo;</span>
+            </a>
+          </li>
+          {% for i in range(1, total_pages + 1) %}
+          <li class="page-item"><a class="page-link" href="/history/{{fromdt}}/{{todt}}/{{i}}">{{i}}</a></li>
+          {% endfor %}
+          <li class="page-item">
+            <a class="page-link" href="/history/{{fromdt}}/{{todt}}/{{page_index+1}}" aria-label="Next">
+              <span aria-hidden="true">&raquo;</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+{% endblock %}
+
+{% block script %}
+<script>
+    $(document).ready(function(){
+        $.datepicker.setDefaults({
+            dateFormat: 'yy-mm-dd'
+        });
+        $(function(){
+            $("#from").datepicker();
+            $("#to").datepicker();
+        });
+        // $('#range').click(function(){
+        //     var From = $('#From').val();
+        //     var to = $('#to').val();
+        //     if(From != '' && to != '')
+        //     {
+        //         $.ajax({
+        //             url:"/range",
+        //             method:"POST",
+        //             data:{From:From, to:to},
+        //             success:function(data)
+        //             {
+        //                 $('#purchase_order').html(data);
+        //                 $('#purchase_order').append(data.htmlresponse);
+        //             }
+        //         });
+        //     }
+        //     else
+        //     {
+        //         alert("Please Select the Date");
+        //     }
+        // });
+    });
+    
+    $("#btn_find").on("click", function(e){
+        e.preventDefault();
+        window.location.replace(`/history/${$('#from').val()}/${$('#to').val()}/1`)
+    });
+
+    function on_submit(){
+        $('#form1').a
+        $('#form1').submit();
+    }
+    </script>
 
 {% endblock %}

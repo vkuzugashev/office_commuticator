@@ -1,6 +1,6 @@
 import pika, sys, os, json
 from datetime import datetime
-sys.path.insert(1, '..')
+sys.path.insert(1, '.')
 from models.model import db, table_calls
 
 def callback(ch, method, properties, body):    
