@@ -10,7 +10,7 @@ if future.response.is_error():
     raise Exception(str(future.response))
 
 def event_listener(event,**kwargs):
-    print('Event:',event.name)
+    print('Event:',event)
     connection = pika.BlockingConnection(pika.ConnectionParameters('localhost', port=5672))
     channel = connection.channel()
 

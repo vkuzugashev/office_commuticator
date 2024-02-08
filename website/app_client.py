@@ -1,9 +1,7 @@
 import sys
 from flask import Flask, render_template, request
 sys.path.insert(1, '.')
-from models.model import db, table_calls
-import math
-import itertools
+from service.db_docker.model import db, table_calls
 
 app = Flask(__name__)
 
@@ -27,6 +25,7 @@ def connection_bd2(fromdt, todt):
 
    
 def get_page(data, page_size, page_index):
+    page_size = 10
     total_items = len(data)
     total_pages = (total_items + page_size - 1) // page_size
     start_index = (page_index - 1) * page_size

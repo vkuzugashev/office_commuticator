@@ -15,3 +15,5 @@ input {
 label[for="phone"] {
     display: block;
 }
+
+.example{width:600px;}
