@@ -1,9 +1,0 @@
-/* внешние границы таблицы серого цвета толщиной 1px */
-table {
-   border: 8px solid grey;
-   width: 1400px;
-}
-/* границы ячеек тела таблицы */
-td {
-   border: 1px solid grey;
-}

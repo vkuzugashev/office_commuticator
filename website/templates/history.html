@@ -6,14 +6,14 @@
 
     <link rel="stylesheet" href="{{ url_for('static', filename='table.css') }}">
 
-    <script src="../instance/imask.css"></script>
-    <script src="../instance/imask.js"></script>
+    <!-- <script src="../instance/imask.css"></script>
+    <script src="../instance/imask.js"></script> -->
 
     <h1 class="mb-5">История звонков</h1>
 
     Время звонка:
-
-        <table style="width:30%" class="table table-striped">
+        
+        <table style="width:30%" class="table">
             <tr>
                 <th>
                     <div class="col">
@@ -26,38 +26,44 @@
                     </div>
                 </th>
                 <th>
-                    <div class="col">
-                        <center>
-                            <button id="btn_find" type="button" class="btn btn-primary">Найти</button>
-                        </center>
+                    <div class="col" class="text-center">
+                        <button id="btn_find" type="button" class="btn btn-primary">Найти</button>
                     </div>
                 </th>
             </tr>
         </table>
     
-    <div class="card-columns">
-        <table class="table table-striped">
-            <th><center>id</center></th>
-            <th><center>кто позвонил</center></th>
-            <th><center>кто ответил</center></th>
-            <th><center>время звонка</center></th>
-            <th><center>время конца звонка</center></th>
-            <th><center>статус звонка</center></th>
-        {% for row in data %}
-            <tr>        
-                <td><center>{{row.id}}</center></td>
-                <td><center>{{row.id_caller}}</center></td>
-                <td><center>{{row.id_callee}}</center></td>
-                <td><center>{{row.call_start}}</center></td>
-                <td><center>{{row.call_end}}</center></td>
-                <td><center>{{row.call_status}}</center></td>
-            </tr>                
-        {% endfor %}
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">id</th>
+                    <th scope="col">номер звонящего</th>
+                    <th scope="col">номер вызываемого</th>
+                    <th scope="col">клиент</th>
+                    <th scope="col">время звонка</th>
+                    <th scope="col">время конца звонка</th>
+                    <th scope="col">статус звонка</th>
+                </tr>
+            </thead>
+            <tbody class="table-group-divider">
+                {% for row in data %}
+                    <tr>        
+                        <td  scope="row">{{row.id}}</td>
+                        <td>{{row.id_caller}}</td>
+                        <td>{{row.id_callee}}</td>
+                        <td>{{row.client_id}}</td>
+                        <td>{{row.call_start}}</td>
+                        <td>{{row.call_end}}</td>
+                        <td>{{row.call_status}}</td>
+                    </tr>                
+                {% endfor %}
+            </tbody>
         </table>        
-    </div>
+   
 
     <nav aria-label="Page navigation example">
-        <ul class="pagination">
+        <ul class="pagination justify-content-center">
           <li class="page-item">
             <a class="page-link" href="/history/{{fromdt}}/{{todt}}/{{page_index-1}}" aria-label="Previous">
               <span aria-hidden="true">&laquo;</span>
