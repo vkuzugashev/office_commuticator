@@ -1,4 +1,4 @@
-import sys, os, json, re, requests, websockets, asyncio, aiormq, random
+import sys, os, json, re, requests, websockets, asyncio, aiormq, random, asyncio
 from datetime import datetime
 from dotenv import load_dotenv
 
@@ -13,7 +13,8 @@ def uniqueid_to_timestamp(uniqueid):
     
 def get_client_info(msisdn):
     response = requests.get(f'http://127.0.0.1:8000/clients/{msisdn}')
-    content = response.content
+    #content = response.content
+    content = response.json()
     if response.status_code == 200:
         return content
     elif response.status_code == 404:
@@ -21,9 +22,10 @@ def get_client_info(msisdn):
 
 def dial_begin(uniqueid, caller, callee, start, call_status):
     message = get_client_info(caller)
-    if message != None:
+    if message != None:        
         print('dial_begin wwith message:', message)
-        #websockets.send(clients, message)
+        websockets.broadcast(clients, json.dumps(message))
+        # websockets.broadcast(clients, json.dumps(caller))
 
 def dial_end(uniqueid, call_status):
     None
@@ -70,8 +72,11 @@ async def handler(websocket):
     clients.add(websocket)
     try:
         # Broadcast a message to all connected clients.
-        websockets.broadcast(clients, "Hello!")
-        #await asyncio.sleep(10)
+        # await asyncio.sleep(1)
+        # message = dial_begin()
+        websockets.broadcast(clients, json.dumps({'hello': 'message'}))
+        while True:
+            await asyncio.sleep(1)
     finally:
         # Unregister.
         #clients.remove(websocket)
@@ -89,6 +94,7 @@ async def start_consumming():
 
 async def start_websocket_serv():
     print(' [*] Waiting connection for websocket. To exit press CTRL+C')
+    #await asyncio.sleep(10)
     async with websockets.serve(handler, "localhost", 5678):
         await asyncio.Future()  # run forever
 

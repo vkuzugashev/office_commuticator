@@ -4,53 +4,44 @@
 
 {% block content %}
 <!-- Кнопка-триггер модального окна -->
-<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-    Запустите демо модального окна
-  </button>
-  
+<button type="button" class="btn btn-primary" onclick="test()">Открыть</button>
+
   <!-- Модальное окно -->
   <div class="modal fade" id="exampleModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl">
       <div class="modal-content">
         <div class="modal-header">
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-md-11 ms-auto">
-                        <h1 class="modal-title fs-5" id="exampleModalLabel">Телефон: <br/>ФИО: </h1>
-                    </div>
-                </div>
-            </div>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
         </div>
         <div class="modal-body">
             <div class="container-fluid">
                 <div class="row">
-                    <div class="col-sm-9">
-                        <div class="row">
-                            <div class="col-md-3 ms-auto">
-                                <h1 class="modal-title fs-5" id="exampleModalLabel">Заказы:</h1>
+                    <div class="col-md-6">
+                        <form class="needs-validation" novalidate>
+                            <div class="form-row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="validationCustom01">Телефон</label>
+                                    <input type="text" class="form-control" id="caller" value="Mark" required>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="validationCustom02">ФИО</label>
+                                    <input type="text" class="form-control" id="client_id" value="Otto" required>
+                                </div>
                             </div>
-                            <div class="col-4 col-sm-6">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col">номер заказа</th>
-                                            <th scope="col">название</th>
-                                            <th scope="col">статус</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="table-group-divider">
-                                        {% for row in data %}
-                                            <tr>        
-                                                <td  scope="row">{{row.id}}</td>
-                                                <td>{{row.id_caller}}</td>
-                                                <td>{{row.id_callee}}</td>
-                                            </tr>                
-                                        {% endfor %}
-                                    </tbody>
-                                </table>  
-                            </div>
-                        </div>
+                        </form>
+                    </div>
+                    <div class="col-md-6 ms-auto">
+                            <h1 class="modal-title fs-5">Заказы:</h1>
+                            <table class="table" id="myTable">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">номер заказа</th>
+                                        <th scope="col">статус</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="table-group-divider" id = "rows">
+                                </tbody>
+                            </table>  
                     </div>
                 </div>
             </div>
@@ -93,5 +84,11 @@
 {% endblock %}
 
 {% block script %}
-    <script src="{{ url_for('static', filename='show_time.js') }}"></script>
+
+    <script src="{{ url_for('static', filename='messege_listener.js') }}"></script>
+    <script>
+        function test(){
+            $('#exampleModal').modal('show');
+        }
+    </script>
 {% endblock %}
