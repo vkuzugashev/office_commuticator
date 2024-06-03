@@ -1,12 +1,18 @@
-import pika, sys, os, redis, json, re
+import pika, sys, os, redis, json, re, requests, websockets, asyncio, random
 from datetime import datetime
+from dotenv import load_dotenv
+
+load_dotenv()
+
+rabbit_host = os.environ.get('RABBIT_HOST')
+redis_host = os.environ.get('REDIS_HOST')
 
 def uniqueid_to_timestamp(uniqueid):
     ts = int(re.search('\d{10}', uniqueid)[0])
     return ts
 
 def get_redis_client():
-    pool = redis.ConnectionPool(host='localhost', port=6379)
+    pool = redis.ConnectionPool(host=redis_host, port=6379)
     return redis.Redis(connection_pool=pool)
 
 def redis_get(key):
@@ -20,8 +26,21 @@ def redis_set(key, value):
     r.set(key, value, ex=3600)
     print(f' [x] Stored in redis: {key} -> {value}\r\n')
     
+def get_client_id(msisdn):
+    response = requests.get(f'http://127.0.0.1:8000/clients/{msisdn}')
+    content = response.content
+    if response.status_code == 200:
+        data = json.loads(content)
+        client_id = (data['client_id'])
+        print('Got client_id: ', data['client_id'])
+        return client_id
+    elif response.status_code == 404:
+        return None
+
 def dial_begin(uniqueid, caller, callee, start, call_status):
-    call = {'uniqueid': uniqueid, 'start': start, 'end': None, 'caller': caller, 'callee': callee, 'call_status': call_status}    
+    client_id = get_client_id(caller)
+    call = {'uniqueid': uniqueid, 'start': start, 'end': None, 'caller': caller, 'callee': callee, 'client_id': client_id, 'call_status': call_status}    
+    id_callee = {'callee': callee, 'client_id': client_id}   
     redis_set(uniqueid, json.dumps(call))
 
 def dial_end(uniqueid, call_status):
@@ -35,14 +54,22 @@ def hangup(uniqueid, end):
     call = json.loads(str_call)
     if call['call_status'] == 'ANSWER':
         call['end'] = end
-    store_to_db(call)
+    store_to_queue(call)
 
-def store_to_db(call):
-    print(f' [x] Store call to db: {call}')
+def store_to_queue(call,**kwargs):
+    connection = pika.BlockingConnection(pika.ConnectionParameters(rabbit_host, port=5672))
+    channel = connection.channel()
+    
+    channel.queue_declare(queue='calls')
 
+    channel.basic_publish(exchange='',
+                          routing_key='calls',
+                          body=json.dumps(call))
+    print(f' [x] Store call to queue: {call}')
+    
 def set_call(key):
     r = get_redis_client()
-    r.setex(key, flushall, 60)
+    r.setex(key, 60)
     
 def event_parse_and_route(body):
     
@@ -80,7 +107,7 @@ def callback(ch, method, properties, body):
     event_parse_and_route(body)
         
 def main():
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host=rabbit_host))
     channel = connection.channel()
     channel.queue_declare(queue='events')   
     channel.basic_consume(queue='events', auto_ack=True, on_message_callback=callback)

@@ -1,8 +1,13 @@
 import pika, os, time, json
-
+from dotenv import load_dotenv
 from asterisk.ami import AMIClient, AutoReconnect
 
-client = AMIClient(address='127.0.0.1', port=5038, timeout=60, encoding='ascii')
+print(f'app_ami starting ...')
+
+load_dotenv()
+
+rabbit_host = os.environ.get('RABBIT_HOST')
+client = AMIClient(address=rabbit_host, port=5038, timeout=180, encoding='ascii')
 AutoReconnect(client)
 future = client.login(username='admin',secret='ami-secret')
 
@@ -32,6 +37,8 @@ def event_listener(event,**kwargs):
 #)
 
 client.add_event_listener(event_listener, white_list=['DialBegin','DialEnd','Hangup'])
+
+print(f'app_ami started.')
 
 try:
     while True:
