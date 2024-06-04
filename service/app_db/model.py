@@ -1,6 +1,6 @@
-from sqlalchemy import create_engine, MetaData, Table, String, Integer, Column
 import os
 from dotenv import load_dotenv
+from sqlalchemy import create_engine, MetaData, Table, String, Integer, Column
 
 load_dotenv()
 
