@@ -17,18 +17,17 @@ logging.basicConfig(level=log_level)
 logger = logging.getLogger('app_ami')
 
 def event_listener(event,**kwargs):
-    logger.info('Event:',event)    
-    connection = pika.BlockingConnection(pika.ConnectionParameters(rabbit_host, port=rabbit_port))
-    channel = connection.channel()
-    channel.queue_declare(queue='events')
-    channel.basic_publish(exchange='',
-                          routing_key='events',
-                          body=json.dumps({'event': event.name, 'params': event.keys}))
-    logger.info(f"[x] Sent Event: {event}")
-    connection.close()
+    logger.info('Start processing, asterisk event:', event)    
+    with pika.BlockingConnection(pika.ConnectionParameters(rabbit_host, port=rabbit_port)) as connection:
+        channel = connection.channel()
+        channel.queue_declare(queue='events')
+        channel.basic_publish(exchange='',
+                            routing_key='events',
+                            body=json.dumps({'event': event.name, 'params': event.keys}))
+        logger.info(f"Sent asterisk to queue, event: {event}")
 
 def run():
-    logger.info('app_ami starting ...')
+    logger.info('Starting ...')
     
     client = AMIClient(address=asterisk_host, port=asterisk_port, timeout=180, encoding='ascii')
     AutoReconnect(client)    
@@ -38,15 +37,15 @@ def run():
     if future.response.is_error():
         raise Exception(str(future.response))
     
-    logger.info('app_ami started.')
+    logger.info('Started.')
     
     try:
         while True:
-            time.sleep(10)
+            time.sleep(1)
     except (KeyboardInterrupt, SystemExit):
         client.logoff()
     
-    logger.info('app_ami stopped')
+    logger.info('Stopped')
 
 if __name__ == '__main__':
     run()

@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 log_level = os.environ.get('LOG_LEVEL', 'INFO')
-rabbit_host = os.environ.get('RABBIT_HOST')
+rabbit_host = os.environ.get('RABBIT_HOST', '0.0.0.0')
 rabbit_port = int(os.environ.get('RABBIT_PORT', '5672'))
 
 logging.basicConfig(level=log_level)
@@ -17,40 +17,37 @@ def run():
     channel = connection.channel()
     channel.queue_declare(queue='calls')   
     channel.basic_consume(queue='calls', auto_ack=False, on_message_callback=callback)
-    logger.info('[*] Waiting for messages. To exit press CTRL+C')
+    logger.info('Waiting for messages. To exit press CTRL+C')
     channel.start_consuming()
 
 def callback(ch, method, properties, body):    
-    logger.info(f'[x] Received {body}')
+    logger.info(f'Received call {body}')
     result = store_to_db(body)
     if result:
         ch.basic_ack(delivery_tag = method.delivery_tag)
 
 def store_to_db(body):
-    conn = db.connect()   
-    call = json.loads(body)
-   
-    ins = table_calls.insert().values(
-        id_caller = call['caller'],
-        id_callee = call['callee'],
-        client_id = call['client_id'],
-        call_start = call['start'],
-        call_end = call['end'],
-        call_status  = call['call_status']
-    )
-
-    tran = conn.begin()
-
-    try:
-        conn.execute(ins)
-        tran.commit()
-        logger.info(f'Call success stored to db, call: {call}')
-        return True
-    except:
-        tran.rollback()
-        logger.info(f'Call fail store to db, call: {call}')
-        return False
-
+    with db.connect() as conn:
+        call = json.loads(body)   
+        ins = table_calls.insert().values(
+            id = 1,
+            caller = call.get('caller'),
+            callee = call.get('callee'),
+            caller_id = call.get('caller_id'),
+            callee_id = call.get('callee_id'),
+            call_start = datetime.fromisoformat(call.get('start')),
+            call_end = datetime.fromisoformat(call.get('end')) if call.get('end') is not None else None,
+            call_status  = call.get('call_status')
+        )
+        try:
+            conn.execute(ins)
+            conn.commit()
+            logger.info(f'Call success stored to db, call: {call}')
+            return True
+        except Exception as e:
+            conn.rollback()
+            logger.error(f'Call fail store to db, call: {call}, {e}')
+            return False
 
 if __name__ == '__main__':
     try:
